@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Matrix Code Challenge</title>
+    <style>
+        body {
+            margin: 0;
+            height: 100vh;
+            background: black;
+            color: white;
+            font-family: Arial, sans-serif;
+            overflow: hidden;
+        }
+
+        canvas {
+            display: block;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        #interface {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 1;
+            text-align: center;
+        }
+
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(3, 70px);
+            gap: 15px;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .grid-item {
+            width: 70px;
+            height: 70px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5em;
+            font-weight: bold;
+            color: violet;
+            background-color: white;
+            border: 2px solid violet;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .grid-item:hover {
+            background-color: violet;
+            color: white;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 1em;
+            font-weight: bold;
+            background-color: violet;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: white;
+            color: violet;
+        }
+
+        #message {
+            margin-top: 20px;
+            font-size: 1.5em;
+            font-weight: bold;
+        }
+
+        .success {
+            color: lime;
+        }
+
+        .error {
+            color: red;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="matrix"></canvas>
+
+    <div id="interface">
+        <div class="grid-container" id="grid">
+            <div class="grid-item" data-value="1">1</div>
+            <div class="grid-item" data-value="2">2</div>
+            <div class="grid-item" data-value="3">3</div>
+            <div class="grid-item" data-value="4">4</div>
+            <div class="grid-item" data-value="5">5</div>
+            <div class="grid-item" data-value="6">6</div>
+            <div class="grid-item" data-value="7">7</div>
+            <div class="grid-item" data-value="8">8</div>
+            <div class="grid-item" data-value="9">9</div>
+        </div>
+        <button onclick="checkCode()">Submit</button>
+        <div id="message"></div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('matrix');
+        const ctx = canvas.getContext('2d');
+
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ123456789@#$%^&*()*&^%";
+        const fontSize = 16;
+        const columns = canvas.width / fontSize;
+        const drops = Array.from({ length: columns }).fill(1);
+
+        function drawMatrix() {
+            ctx.fillStyle = "rgba(0, 0, 0, 0.05)";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            ctx.fillStyle = "violet";
+            ctx.font = `${fontSize}px monospace`;
+
+            drops.forEach((y, x) => {
+                const text = letters[Math.floor(Math.random() * letters.length)];
+                ctx.fillText(text, x * fontSize, y * fontSize);
+
+                if (y * fontSize > canvas.height && Math.random() > 0.975) {
+                    drops[x] = 0;
+                }
+                drops[x]++;
+            });
+        }
+
+        setInterval(drawMatrix, 50);
+
+        const correctCode = ["5", "6", "7"];
+        const selectedValues = [];
+
+        document.querySelectorAll('.grid-item').forEach(item => {
+            item.addEventListener('click', () => {
+                if (selectedValues.length < 3) {
+                    selectedValues.push(item.getAttribute('data-value'));
+                    item.style.backgroundColor = 'lime';
+                    item.style.color = 'black';
+                }
+            });
+        });
+
+        function checkCode() {
+            const messageDiv = document.getElementById('message');
+
+            if (JSON.stringify(selectedValues) === JSON.stringify(correctCode)) {
+                messageDiv.textContent = "BRAVO BONNE RÉPONSE";
+                messageDiv.className = "success";
+            } else {
+                messageDiv.textContent = "ERREUR. Réessayez.";
+                messageDiv.className = "error";
+            }
+
+            selectedValues.length = 0;
+            document.querySelectorAll('.grid-item').forEach(item => {
+                item.style.backgroundColor = 'white';
+                item.style.color = 'violet';
+            });
+        }
+    </script>
+</body>
+</html>
